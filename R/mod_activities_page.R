@@ -14,8 +14,8 @@ mod_activities_ui <- function(id) {
             NS(id, "year_select"),
             label = "Filter by year",
             min = 2001,
-            max = 2045,
-            value = c(2015, 2023),
+            max = as.numeric(format(Sys.Date(), "%Y")) + 4,
+            value = c(as.numeric(format(Sys.Date(), "%Y")) - 4, as.numeric(format(Sys.Date(), "%Y"))),
             sep = ""
           )
         ),
@@ -50,8 +50,12 @@ mod_activities_ui <- function(id) {
         )
     ), # fluidRow (summaries)
     fluidRow(
-      box(width = 6,
-          
+      # box(width = 6,
+      #     h2("Policy markers", align = "center"),
+      #     plotlyOutput(ns("markers_selected"))
+      #     ),
+      box(width = 12,
+          DT::dataTableOutput(ns("titles_selected"))
           )
     )
   ) # tagList
@@ -63,16 +67,19 @@ mod_activities_server <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {
+      activities_selected = reactive(
+        filterData(activities, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) 
+      )
       output$activities_selected <- renderValueBox({
         valueBox(
-        filterData(acts, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) %>%
+        activities_selected() %>%
           getCount("iati_identifier"),
         "Activities", icon = icon("list"), color = "green"
         )
       })
       output$orgs_selected <- renderValueBox({
         valueBox(
-        filterData(acts, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) %>%
+        activities_selected() %>%
           getCount("participating_org_narrative"),
         "Organisations", icon = icon("sitemap"), color = "red"
         )
@@ -86,6 +93,17 @@ mod_activities_server <- function(id) {
             "Total budget (in billions)", icon = icon("money-bill"), color = "blue"
           )
       })
+        output$markers_selected <- renderPlotly({
+          filterData(activity_markers, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) %>%
+           dplyr::mutate(marker = reorder(marker, policy_marker_code, decreasing = TRUE)) %>% 
+            dplyr::filter(policy_marker_significance_binary == 1) %>% 
+            makeBarGraph("marker", "Set2")
+        })
+        output$titles_selected <- DT::renderDataTable({
+         activities_selected() %>% 
+            select(title_narrative, description_narrative) %>% 
+            arrange(title_narrative)
+        })
     }
   ) # moduleServer
 }
