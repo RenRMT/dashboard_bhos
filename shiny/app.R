@@ -1,44 +1,44 @@
-library(shiny)
-library(shinydashboard)
 library(dplyr)
-library(tidyr)
-library(purrr)
+library(DT)
 library(ggplot2)
 library(plotly)
-library(stringr)
-library(DT)
+library(purrr)
 library(scales)
+library(shiny)
+library(shinydashboard)
+library(stringr)
+library(tidyr)
 
+# module files
 source("../R/mod_activities_page.R", local = TRUE)
 source("../R/mod_budget_page.R", local = TRUE)
 source("../R/mod_recipients_page.R", local = TRUE)
-source("../R/mod_about_page.R", local = TRUE)
+
+# script files
 source("../R/tables.R", local = TRUE)
-source("../R/graphs.R", local = TRUE)
 source("../R/utils.R", local = TRUE)
 
 # ui ----------------------------------------------------------------------
 
 ui <- function() {
   dashboardPage(
-    
+
     # Header ------------------------------------------------------------------
     header = dashboardHeader(title = "Dutch Development Cooperation"),
-    
+
     # Sidebar -----------------------------------------------------------------
-    
+
     sidebar = dashboardSidebar(
       sidebarMenu(
         id = "tabs",
         menuItem("Activities", tabName = "activities", icon = icon("list-check")),
         menuItem("Budget", tabName = "budget", icon = icon("money-bill-trend-up")),
-        menuItem("Recipients", tabName = "recipients", icon = icon("people-arrows")),
-        menuItem("About", tabName = "about", icon = icon("circle-info"))
+        menuItem("Recipients", tabName = "recipients", icon = icon("people-arrows"))
       ) # sidebarMenu
     ),
-    
+
     # Body --------------------------------------------------------------------
-    
+
     body = dashboardBody(
       tabItems(
         tabItem("activities", mod_activities_ui("activities_1")),

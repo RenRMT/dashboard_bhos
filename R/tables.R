@@ -44,7 +44,7 @@ activity_markers <- tables$markers %>%
   dplyr::left_join(activity_locations, by = "iati_identifier") %>%
   dplyr::left_join(activity_sectors, by = "iati_identifier")
 
-acts <- dplyr::left_join(tables$activities, activity_sectors, by = c("iati_identifier", "sector_code")) %>%
+activities <- dplyr::left_join(tables$activities, activity_sectors, by = c("iati_identifier", "sector_code")) %>%
   dplyr::left_join(activity_years, by = "iati_identifier") %>%
   dplyr::left_join(activity_locations, by = "iati_identifier") %>%
   dplyr::left_join(dplyr::filter(tables$orgs, participating_org_role == 4), by = "iati_identifier")
