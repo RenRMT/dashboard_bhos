@@ -53,6 +53,12 @@ filterBudgetData <- function(dat, start, end, sectors, locations) {
   dat_filtered
 }
 
+filterOrgData <- function(dat, org_type) {
+  dat_filtered <- dat
+  if(!is.null(org_type)){dat_filtered <- dplyr::filter(dat_filtered, org_type_name %in% org_type)}
+  dat_filtered
+}
+
 getCount = function(dat, col) {
   count = length(unique(dat[[col]]))
 }

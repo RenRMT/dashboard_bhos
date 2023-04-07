@@ -78,17 +78,12 @@ mod_budget_server <- function(id) {
             unlist()
 
           updateSelectizeInput(session, "activity_select",
-            choices = unique(activities_filtered$title_narrative),
+            choices = sort(unique(activities_filtered$title_narrative)),
             server = TRUE
           )
         },
         ignoreNULL = FALSE
       )
-
-      output$budget_graph <- renderPlotly({
-        activity_budgets %>% dplyr::filter(iati_identifier)
-      })
-
 
       output$budget_graph <- renderPlotly({
         activity_budgets[activity_budgets$iati_identifier == returnIdentifier(activities, "title_narrative", input$activity_select), ] %>%
