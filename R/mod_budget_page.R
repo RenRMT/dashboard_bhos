@@ -10,18 +10,15 @@ mod_budget_ui <- function(id) {
         width = 12,
         column(
           width = 4,
-          sliderInput(
-            NS(id, "year_select"),
-            label = "Filter by year",
-            min = 2001,
-            max = 2045,
-            value = c(2015, 2023),
-            sep = ""
+          selectizeInput(
+            NS(id, "activity_select"),
+            label = "Select activity",
+            choices = NULL
           )
         ),
         column(
           width = 4,
-          selectInput(NS(id, "location_select"),
+          selectizeInput(NS(id, "location_select"),
             label = "Filter location(s)",
             choices = sort(unique(activity_locations$location_narrative)),
             multiple = TRUE
@@ -33,21 +30,27 @@ mod_budget_ui <- function(id) {
             label = "Filter sector(s)",
             choices = sort(unique(activity_sectors$name)),
             multiple = TRUE
+          ),
+          radioButtons(
+            NS(id, "transaction_type"),
+            label = "Transaction type",
+            choices = c("commitment", "disbursement"),
+            inline = TRUE
           )
         )
       )
     ), # fluidRow (controls)
     fluidRow(
       box(
-        width = 5,
-        h2("Total budget in million €", align = "center"),
+        width = 6,
+        h2("Activity budget in €", align = "center"),
         plotlyOutput(ns("budget_graph"))
       ),
       box(
-        width = 5,
-        h2("Total transactions in million €", align = "center"),
+        width = 6,
+        h2("Activity transactions in €", align = "center"),
         plotlyOutput(ns("transaction_graph"))
-      )
+      ),
     ) # fluidRow
   ) # tagList
 } # budgetUI
@@ -58,16 +61,47 @@ mod_budget_server <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {
-      output$budget_graph <- renderPlotly(
-        filterBudgetData(activity_budgets, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) %>%
-          dplyr::group_by(year) %>% dplyr::summarise(Year = year, Budget = round(sum(budget_value) / 1000000, 2), .groups = "keep") %>%
+      activities_filtered <- reactiveValues()
+      observeEvent(
+        {
+          input$sector_select
+          input$location_select
+        },
+        {
+          activities_filtered$title_narrative <- filterData(
+            activities,
+            2001,
+            2045,
+            input$sector_select,
+            input$location_select) %>%
+            dplyr::select(title_narrative) %>%
+            unlist()
+
+          updateSelectizeInput(session, "activity_select",
+            choices = unique(activities_filtered$title_narrative),
+            server = TRUE
+          )
+        },
+        ignoreNULL = FALSE
+      )
+
+      output$budget_graph <- renderPlotly({
+        activity_budgets %>% dplyr::filter(iati_identifier)
+      })
+
+
+      output$budget_graph <- renderPlotly({
+        activity_budgets[activity_budgets$iati_identifier == returnIdentifier(activities, "title_narrative", input$activity_select), ] %>%
+          dplyr::group_by(year) %>%
+          dplyr::summarise(Year = year, Budget = round(sum(budget_value, na.rm = TRUE), 2), .groups = "keep") %>%
           makeLineGraph(vars = c("Year", "Budget"), color = "red")
-      )
-      output$transaction_graph <- renderPlotly(
-        filterBudgetData(activity_transactions, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) %>%
-          dplyr::group_by(year) %>% dplyr::summarise(Year = year, Transactions = round(sum(disbursement, na.rm = TRUE) / 1000000, 2), .groups = "keep") %>%
-          makeLineGraph(vars = c("Year", "Transactions"), color = "green")
-      )
+      })
+      output$transaction_graph <- renderPlotly({
+        activity_transactions[activity_transactions$iati_identifier == returnIdentifier(activities, "title_narrative", input$activity_select), ] %>%
+          dplyr::group_by(year) %>%
+          dplyr::summarise(Year = year, Transaction = round(sum(.data[[input$transaction_type]], na.rm = TRUE), 2), .groups = "keep") %>%
+          makeLineGraph(vars = c("Year", "Transaction"), color = "darkgreen")
+      })
     }
   ) # moduleServer
 } # budgetServer
