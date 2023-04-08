@@ -23,7 +23,7 @@ mod_activities_ui <- function(id) {
           width = 4,
           selectInput(NS(id, "location_select"),
             label = "Filter location(s)",
-            choices = sort(unique(activity_locations$location_narrative)),
+            choices = sort(unique(tables$activity_locations$location_narrative)),
             multiple = TRUE
           )
         ),
@@ -31,7 +31,7 @@ mod_activities_ui <- function(id) {
           width = 4,
           selectInput(NS(id, "sector_select"),
             label = "Filter sector(s)",
-            choices = sort(unique(activity_sectors$name)),
+            choices = sort(unique(tables$activity_sectors$name)),
             multiple = TRUE
           )
         )
@@ -68,7 +68,7 @@ mod_activities_server <- function(id) {
     id,
     function(input, output, session) {
       activities_selected = reactive(
-        filterData(activities, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) 
+        filterData(tables$activities, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) 
       )
       output$activities_selected <- renderValueBox({
         valueBox(
@@ -87,14 +87,14 @@ mod_activities_server <- function(id) {
         output$budget_selected <- renderValueBox({
           valueBox(
             sprintf("€ %.2f",
-            summarise(ungroup(filterBudgetData(activity_budgets, input$year_select[1], input$year_select[2], input$sector_select, input$location_select)
+            summarise(ungroup(filterBudgetData(tables$activity_budgets, input$year_select[1], input$year_select[2], input$sector_select, input$location_select)
             ), sum(budget_value) / 1000000000)
             ),
             "Total budget (in billions)", icon = icon("money-bill"), color = "blue"
           )
       })
         output$markers_selected <- renderPlotly({
-          filterData(activity_markers, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) %>%
+          filterData(tables$activity_markers, input$year_select[1], input$year_select[2], input$sector_select, input$location_select) %>%
            dplyr::mutate(marker = reorder(marker, policy_marker_code, decreasing = TRUE)) %>% 
             dplyr::filter(policy_marker_significance_binary == 1) %>% 
             makeBarGraph("marker", "Set2")

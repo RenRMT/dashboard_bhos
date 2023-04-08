@@ -2,15 +2,21 @@
 # line graphs -------------------------------------------------------------
 
 makeLineGraph = function(dat, vars = c("", ""), color = "green", labs = c("", "")) {
-  p = dat %>% ggplot2::ggplot(ggplot2::aes(x = .data[[vars[1]]], y = .data[[vars[2]]])) +
-    ggplot2::geom_area(fill = color, alpha = 0.5) +
-    ggplot2::geom_line(colour = color, linewidth = 1) +
-    ggplot2::labs(x = labs[1], y = labs[2]) +
-    ggplot2::scale_y_continuous(labels = scales::label_comma()) +
-    ggplot2::scale_x_continuous(breaks = scales::extended_breaks()) +
+  if(nrow(dat)==1){p <- dat %>% ggplot2::ggplot(ggplot2::aes(x = .data[[vars[1]]], y = .data[[vars[2]]])) +
+    ggplot2::geom_bar(fill = color, alpha = 0.5, stat = "identity") +
+    ggplot2::scale_x_continuous(limits = c(dat[[vars[1]]] - 1, dat[[vars[1]]] + 1),
+                                breaks = scales::extended_breaks()) +
     ggplot2::theme_classic()
-  
-  out = plotly::ggplotly(p)%>% plotly::config(displayModeBar = FALSE) %>%
+  } else{
+    p = dat %>% ggplot2::ggplot(ggplot2::aes(x = .data[[vars[1]]], y = .data[[vars[2]]])) +
+      ggplot2::geom_area(fill = color, alpha = 0.5) +
+      ggplot2::geom_line(colour = color, linewidth = 1) +
+      ggplot2::labs(x = labs[1], y = labs[2]) +
+      ggplot2::scale_y_continuous(labels = scales::label_comma()) +
+      ggplot2::scale_x_continuous(breaks = scales::extended_breaks()) +
+      ggplot2::theme_classic()
+  }
+  out = plotly::ggplotly(p) %>% plotly::config(displayModeBar = FALSE) %>%
     plotly::layout(xaxis = list(fixedrange = TRUE), yaxis = list(fixedrange = TRUE))%>%
     plotly::style(hoverinfo = "skip", traces = 1)
   

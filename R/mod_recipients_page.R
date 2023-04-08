@@ -20,17 +20,12 @@ mod_recipients_ui = function(id) {
           width = 4,
           selectizeInput(NS(id, "org_type_select"),
                          label = "Filter Organisation type(s)",
-                         choices = sort(unique(activity_orgs$org_type_name)),
+                         choices = sort(unique(tables$activity_orgs$org_type_name)),
                          multiple = TRUE
           )
         ),
         column(
-          width = 4 #,
-          # selectInput(NS(id, "sector_select"),
-          #             label = "Filter sector(s)",
-          #             choices = sort(unique(activity_sectors$name)),
-          #             multiple = TRUE
-          # )
+          width = 4
         )
       )
     ), # fluidRow (controls)
@@ -69,7 +64,7 @@ mod_recipients_server = function(id) {
         },
         {
           orgs_filtered$participating_org_narrative <- filterOrgData(
-            activity_orgs,
+            tables$activity_orgs,
             input$org_type_select) %>%
             dplyr::select(participating_org_narrative) %>%
             unlist()
@@ -82,7 +77,7 @@ mod_recipients_server = function(id) {
         ignoreNULL = FALSE
       )
     activities_filtered = reactive({
-      dplyr::filter(activities, participating_org_narrative == input$org_select)
+      dplyr::filter(tables$activities, participating_org_narrative == input$org_select)
     })
     
     output$activities_selected <- renderValueBox({

@@ -11,20 +11,22 @@ library(tidyr)
 
 # module files
 source("../R/mod_activities_page.R", local = TRUE)
-source("../R/mod_budget_page.R", local = TRUE)
 source("../R/mod_recipients_page.R", local = TRUE)
+source("../R/mod_budget_page.R", local = TRUE)
 
 # script files
-source("../R/tables.R", local = TRUE)
 source("../R/utils.R", local = TRUE)
 
+# data files
+tables = readRDS("../data/tables.rds")
+codelists = readRDS("../data/codelists.rds")
 # ui ----------------------------------------------------------------------
 
 ui <- function() {
   dashboardPage(
 
     # Header ------------------------------------------------------------------
-    header = dashboardHeader(title = "Dutch Development Cooperation"),
+    header = dashboardHeader(title = "Dutch Development Activities"),
 
     # Sidebar -----------------------------------------------------------------
 

@@ -20,7 +20,7 @@ mod_budget_ui <- function(id) {
           width = 4,
           selectizeInput(NS(id, "location_select"),
             label = "Filter location(s)",
-            choices = sort(unique(activity_locations$location_narrative)),
+            choices = sort(unique(tables$activity_locations$location_narrative)),
             multiple = TRUE
           )
         ),
@@ -28,7 +28,7 @@ mod_budget_ui <- function(id) {
           width = 4,
           selectInput(NS(id, "sector_select"),
             label = "Filter sector(s)",
-            choices = sort(unique(activity_sectors$name)),
+            choices = sort(unique(tables$activity_sectors$name)),
             multiple = TRUE
           ),
           radioButtons(
@@ -69,7 +69,7 @@ mod_budget_server <- function(id) {
         },
         {
           activities_filtered$title_narrative <- filterData(
-            activities,
+            tables$activities,
             2001,
             2045,
             input$sector_select,
@@ -86,15 +86,16 @@ mod_budget_server <- function(id) {
       )
 
       output$budget_graph <- renderPlotly({
-        activity_budgets[activity_budgets$iati_identifier == returnIdentifier(activities, "title_narrative", input$activity_select), ] %>%
+        tables$activity_budgets[tables$activity_budgets$iati_identifier == returnIdentifier(tables$activities, "title_narrative", input$activity_select), ] %>%
           dplyr::group_by(year) %>%
           dplyr::summarise(Year = year, Budget = round(sum(budget_value, na.rm = TRUE), 2), .groups = "keep") %>%
           makeLineGraph(vars = c("Year", "Budget"), color = "red")
       })
       output$transaction_graph <- renderPlotly({
-        activity_transactions[activity_transactions$iati_identifier == returnIdentifier(activities, "title_narrative", input$activity_select), ] %>%
+        tables$activity_transactions[tables$activity_transactions$iati_identifier == returnIdentifier(tables$activities, "title_narrative", input$activity_select), ] %>%
           dplyr::group_by(year) %>%
           dplyr::summarise(Year = year, Transaction = round(sum(.data[[input$transaction_type]], na.rm = TRUE), 2), .groups = "keep") %>%
+          unique() %>% 
           makeLineGraph(vars = c("Year", "Transaction"), color = "darkgreen")
       })
     }
