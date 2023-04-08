@@ -10,16 +10,16 @@ library(stringr)
 library(tidyr)
 
 # module files
-source("./R/mod_activities_page.R", local = TRUE)
-source("./R/mod_recipients_page.R", local = TRUE)
-source("./R/mod_budget_page.R", local = TRUE)
+source("R/mod_activities_page.R", local = TRUE)
+source("R/mod_recipients_page.R", local = TRUE)
+source("R/mod_budget_page.R", local = TRUE)
 
 # script files
-source("./R/utils.R", local = TRUE)
+source("R/utils.R", local = TRUE)
 
 # data files
-tables = readRDS("./data/tables.rds")
-codelists = readRDS("./data/codelists.rds")
+tables = readRDS("data/tables.RDS")
+codelists = readRDS("data/codelists.RDS")
 # ui ----------------------------------------------------------------------
 
 ui <- function() {
